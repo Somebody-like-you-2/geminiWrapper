@@ -12,6 +12,6 @@ export const getChat = (req, res) =>
 export const getQuery = async(req, res) =>
 {   
     const aiResponse = await generateContent(req.body.query)
-
+    console.log(req.body.query)
     res.json({"message": aiResponse})
 }

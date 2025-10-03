@@ -1,161 +1,259 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chat Interface</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GeminiWrapper</title>
+  <style>
+    :root{
+      --bg:#0f1720;
+      --panel:#0b1220;
+      --muted:#98a0b3;
+      --accent:#7c5cff;
+      --accent-2:#4dd0e1;
+      --user:#6a5cff;
+      --ai:#1f2937;
+      --glass: rgba(255,255,255,0.03);
+      --radius:18px;
+      --gap:14px;
+    }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background-color: #1a1a1a;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
+    /* Reset */
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(124,92,255,0.06), transparent),
+                  radial-gradient(900px 400px at 90% 90%, rgba(77,208,225,0.04), transparent),
+                  var(--bg);
+      color:#e6eef8;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:env(safe-area-inset);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:100vh;
+    }
 
-        .chat-container {
-            width: 100%;
-            max-width: 800px;
-            height: 100vh;
-            background-color: #2a2a2a;
-            border-radius: 16px;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            margin: 1rem 0 1rem 0;
+    /* GeminiWrapper container */
+    .geminiwrapper{
+      width:100%;
+      max-width:820px;
+      height:calc(100vh - 32px);
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:24px;
+      box-shadow: 0 10px 40px rgba(2,6,23,0.7);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      border:1px solid rgba(255,255,255,0.03);
+    }
 
-        }
+    /* Header */
+    .gw-header{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:14px 18px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+      border-bottom:1px solid rgba(255,255,255,0.02);
+      backdrop-filter: blur(6px);
+    }
 
-        .chat-area {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
+    .gw-brand{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      flex:1;
+    }
 
-        .message {
-            max-width: 70%;
-            padding: 12px 16px;
-            border-radius: 16px;
-            line-height: 1.5;
-            font-size: 16px;
-        }
+    .gw-logo{
+      width:44px;height:44px;border-radius:10px;
+      background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      display:flex;align-items:center;justify-content:center;
+      font-weight:700;font-size:18px;color:white;box-shadow:0 6px 18px rgba(124,92,255,0.12);
+    }
 
-        .user-message {
-            background-color: #6200ea;
-            color: #ffffff;
-            align-self: flex-end;
-            border-bottom-right-radius: 4px;
-        }
+    .gw-title{
+      line-height:1;
+    }
+    .gw-title .name{font-size:15px;font-weight:700}
+    .gw-title .sub{font-size:12px;color:var(--muted);margin-top:2px}
 
-        .ai-message {
-            background-color: #3c3c3c;
-            color: #e0e0e0;
-            align-self: flex-start;
-            border-bottom-left-radius: 4px;
-        }
+    .gw-actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
 
-        .input-area {
-            padding: 20px;
-            background-color: #222222;
-            border-top: 1px solid #444444;
-            display: flex;
-            align-items: center;
-        }
+    .gw-action-btn{
+      background:var(--glass);
+      border:1px solid rgba(255,255,255,0.03);
+      padding:8px 10px;border-radius:10px;
+      font-size:13px;color:var(--muted);
+      display:inline-flex;align-items:center;gap:8px;
+    }
 
-        .input-area input {
-            flex: 1;
-            padding: 12px 16px;
-            border: none;
-            border-radius: 20px;
-            background-color: #333333;
-            color: #ffffff;
-            font-size: 16px;
-            outline: none;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-        }
+    /* Chat area */
+    .chat-area{
+      flex:1;
+      padding:18px;
+      overflow-y:auto;
+      display:flex;
+      flex-direction:column;
+      gap:var(--gap);
+      scroll-behavior:smooth;
+    }
 
-        .input-area input::placeholder {
-            color: #888888;
-        }
+    /* Message bubbles */
+    .message{
+      max-width:78%;
+      padding:12px 14px;
+      border-radius:14px;
+      line-height:1.35;
+      font-size:15px;
+      box-shadow: 0 6px 16px rgba(2,6,23,0.45);
+      position:relative;
+      word-break:break-word;
+      display:inline-flex;
+      gap:10px;
+      align-items:flex-start;
+    }
 
-        .input-area button {
-            margin-left: 10px;
-            padding: 12px;
-            background-color: #6200ea;
-            color: #ffffff;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 44px;
-            height: 44px;
-            transition: background-color 0.2s;
-        }
+    .message:focus{outline:2px solid rgba(124,92,255,0.15)}
 
-        .input-area button:hover {
-            background-color: #4500a0;
-        }
+    /* avatars */
+    .avatar{
+      width:36px;height:36px;border-radius:8px;flex:0 0 36px;
+      display:flex;align-items:center;justify-content:center;
+      font-weight:700;font-size:15px;color:white;
+    }
 
-        .input-area button::before {
-            content: '➤';
-            font-size: 20px;
-            transform: rotate(-45deg);
-        }
+    .ai-message{ background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); color:#dbe7ff; border-top-left-radius:6px; align-self:flex-start;}
+    .ai-message .avatar{ background:linear-gradient(180deg, #27303a, #1b2430) }
 
-        /* Scrollbar styling */
-        .chat-area::-webkit-scrollbar {
-            width: 8px;
-        }
+    .user-message{ background:linear-gradient(180deg, rgba(122,91,255,0.14), rgba(122,91,255,0.08)); color:white; border-top-right-radius:6px; align-self:flex-end;}
+    .user-message .avatar{ background:linear-gradient(180deg,var(--user),#4b3cff) }
 
-        .chat-area::-webkit-scrollbar-track {
-            background: #2a2a2a;
-        }
+    /* Layout for message content (avatar + bubble) */
+    .msg-row{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+    }
 
-        .chat-area::-webkit-scrollbar-thumb {
-            background: #555555;
-            border-radius: 4px;
-        }
+    /* AI: avatar left, bubble right */
+    .ai-row{ flex-direction:row; }
+    /* User: bubble left, avatar right */
+    .user-row{ flex-direction:row-reverse; }
 
-        @media (max-width: 600px) {
-            .chat-container {
-                border-radius: 0;
-                height: 100vh;
-            }
+    /* Fine tune bubble size on small screens */
+    @media (max-width:520px){
+      .geminiwrapper{ border-radius:14px; height:100vh; max-width:100% }
+      .message{ max-width:92%; font-size:15px }
+      .gw-logo{ width:40px;height:40px;font-size:17px;border-radius:8px }
+      .gw-header{padding:12px}
+      .chat-area{padding:14px}
+    }
 
-            .message {
-                max-width: 85%;
-            }
+    /* Input area */
+    .input-area{
+      padding:12px;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      border-top:1px solid rgba(255,255,255,0.02);
+      background:linear-gradient(180deg, rgba(255,255,255,0.005), transparent);
+    }
 
-            .input-area input {
-                font-size: 14px;
-            }
-        }
-    </style>
+    .input-wrap{
+      flex:1;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      background:rgba(255,255,255,0.02);
+      padding:8px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.02);
+    }
+
+    .input-wrap input{
+      flex:1;
+      background:transparent;
+      border:0;
+      color:inherit;
+      font-size:15px;
+      padding:10px 8px;
+      outline:none;
+    }
+
+    .send-btn{
+      height:44px;width:44px;border-radius:50%;
+      display:inline-flex;align-items:center;justify-content:center;
+      border:0;cursor:pointer;
+      background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      color:white;font-weight:700;font-size:18px;
+      box-shadow:0 8px 20px rgba(77,208,225,0.08), inset 0 -6px 18px rgba(0,0,0,0.08);
+    }
+    .send-btn:active{transform:translateY(1px)}
+
+    /* subtle helper text when empty */
+    .helper{
+      font-size:12px;color:var(--muted);margin-left:8px;
+    }
+
+    /* empty state */
+    .empty{
+      color:var(--muted);
+      text-align:center;
+      padding:18px;
+      border-radius:12px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.005), transparent);
+      font-size:14px;
+      border:1px dashed rgba(255,255,255,0.02);
+    }
+
+    /* Nice rounded scrollbar (chromium) */
+    .chat-area::-webkit-scrollbar{ width:10px }
+    .chat-area::-webkit-scrollbar-track{ background:transparent }
+    .chat-area::-webkit-scrollbar-thumb{ background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01)); border-radius:10px; }
+
+  </style>
 </head>
 <body>
-    <div class="chat-container">
-        <div class="chat-area" id="chatArea">
-            <div class="message ai-message">Hello! How can I assist you today?</div>
+  <div class="geminiwrapper" role="application" aria-label="Gemini chat wrapper">
+    <header class="gw-header">
+      <div class="gw-brand" aria-hidden="true">
+        <div class="gw-logo">G</div>
+        <div class="gw-title">
+          <div class="name">GeminiWrapper</div>
+          <div class="sub">Fast, simple AI chat</div>
         </div>
-        <div class="input-area">
-            <input type="text" id="userInput" placeholder="Type your message..." />
-            <button onclick="sendMessage()"></button>
-        </div>
-    </div>
+      </div>
 
-    <script src="/chat.js"></script>
+      <div class="gw-actions" aria-hidden="true">
+        <div class="gw-action-btn">New</div>
+        <div class="gw-action-btn">Clear</div>
+      </div>
+    </header>
+
+    <main id="chatArea" class="chat-area" aria-live="polite">
+      <div class="msg-row ai-row">
+        <div class="avatar" aria-hidden="true">AI</div>
+        <div class="message ai-message" tabindex="0">Hello! How can I assist you today?</div>
+      </div>
+    </main>
+
+    <div class="input-area">
+      <div class="input-wrap" role="search">
+        <input id="userInput" type="text" autocomplete="off" placeholder="Type a message or ask something..." aria-label="Type your message" />
+      </div>
+
+      <button id="sendBtn" class="send-btn" type="button" onclick="sendMessage()" aria-label="Send message">➤</button>
+    </div>
+  </div>
+
+  <script src="/chat.js"></script>
 </body>
 </html>

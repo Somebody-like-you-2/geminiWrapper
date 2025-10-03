@@ -10,6 +10,7 @@ async  function sendMessage() {
             userMessage.className = 'message user-message';
             userMessage.textContent = messageText;
             chatArea.appendChild(userMessage);
+            input.value = '';
 
 
 
@@ -31,7 +32,6 @@ async  function sendMessage() {
             chatArea.appendChild(aiMessage);
 
 
-            input.value = '';
             chatArea.scrollTop = chatArea.scrollHeight;
         }
     }
