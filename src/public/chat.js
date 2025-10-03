@@ -1,4 +1,4 @@
-const serverurl = "http://localhost:4000"
+const serverurl = ""
 
 async  function sendMessage() {
         const input = document.getElementById('userInput');
