@@ -1,5 +1,5 @@
 import express from "express";
-import { router as chatRoutes } from "./routes.js";
+import { router as chatRoutes } from "./src/routes.js";
 import { fileURLToPath } from 'url';
 import path, { dirname } from 'path';
 import cors from 'cors';
@@ -13,7 +13,7 @@ app.use(cors({
     origin: '*' 
 }));
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, './src/public')));
 app.use(express.json());
 app.use(chatRoutes);
 
